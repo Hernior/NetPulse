@@ -253,12 +253,6 @@ Para contribuir:
 
 Problemas, sugestões e solicitações de recursos também podem ser registrados na seção **Issues** do GitHub.
 
-## 📜 Licença
-
-Sugestão: distribuir o projeto sob a **Licença MIT**, permitindo uso, estudo, modificação e redistribuição, conforme os termos da licença.
-
-Para adotá-la, adicione um arquivo `LICENSE` ao repositório contendo o texto oficial da licença MIT, com o ano e o titular dos direitos autorais.
-
 ## ⭐ Apoie o projeto
 
 Se o NetPulse foi útil para você, considere deixar uma estrela ⭐ no repositório.
