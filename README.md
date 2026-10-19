@@ -1,264 +1,45 @@
-# 🌐 NetPulse — Monitoramento de Conectividade e Diagnóstico de Rede
+# NetPulse
 
-**Monitore sua conexão com a internet em tempo real, identifique interrupções, acompanhe a latência e gere relatórios para documentar problemas de conectividade.**
+Free, local-first, open-source network monitoring dashboard with zero npm dependencies. UI in Brazilian Portuguese.
 
-O **NetPulse** é uma aplicação web open source, inspirada no PingInfoView, desenvolvida para facilitar o monitoramento contínuo da conexão com a internet.
+## Quick start (Windows)
 
-Com uma interface intuitiva, gráficos de desempenho, registros persistentes e diagnósticos automatizados, o NetPulse ajuda usuários domésticos, profissionais de TI e administradores de redes a identificar problemas de conectividade e documentar interrupções de serviço.
+1. Install Node.js 22+ (https://nodejs.org/).
+2. Double-click `INICIAR-WINDOWS.bat`.
+3. Open http://127.0.0.1:8787.
 
-O projeto foi pensado especialmente para quem precisa reunir evidências técnicas sobre instabilidades e quedas frequentes de conexão para apresentação ao provedor de internet.
+The backend must stay running. For optional start at Windows login, run `CONFIGURAR-INICIO-WINDOWS.bat`; use `DESATIVAR-INICIO-WINDOWS.bat` to undo. A packaged standalone .exe is not included.
 
-## ✨ Funcionalidades
+Linux/macOS (with `ping` and `traceroute` installed): `node server.js`. Optional Linux Docker setup: `docker compose up --build -d` (host networking). Windows Docker is not a supported deployment method yet.
 
-### 📡 Monitoramento em tempo real
+## Monitoring features
 
-- Monitoramento contínuo de servidores DNS públicos.
-- Testes periódicos de conectividade.
-- Medição da latência em milissegundos.
-- Identificação de destinos disponíveis e indisponíveis.
-- Atualização automática dos resultados.
-- Visualização do comportamento da conexão por meio de gráficos.
+- ICMP pings to Cloudflare, Google, Quad9, OpenDNS, and local gateway when detectable
+- HTTPS availability and separate DNS name-resolution test
+- Configurable custom ICMP, TCP, HTTPS endpoints (up to 12)
+- Visual live status, per-target packet loss, latency and sample-to-sample jitter
+- JSON incident records (start, recovery and duration) under `dados/quedas.json`
+- Persistent newline-delimited JSON samples at `dados/amostras.ndjson`, with configurable retention (daily prune)
+- Historical summary for 24 hours / 7 days / 30 days
+- Automatic/manual traceroute and a diagnostic overview
+- Audible alerts (browser tab must stay open and audio must be enabled)
+- Optional Telegram bot alerts for suspected general outages and recovery
+- Printer-friendly PDF report page: **Print > Save as PDF**, with ISP and support ticket fields
+- CSV session export and incident JSON export
+- Local settings at `dados/config.json` (contains the Telegram token if configured; do not publish)
 
-### 🌎 Servidores monitorados
+Telegram, custom endpoints, Windows startup, Docker, and traceroute automation are optional. No cloud registration is required. Network monitoring continues with the browser closed as long as the Node process stays running. Telegram alerts naturally require connectivity to Telegram and may not be delivered during an outage.
 
-Por padrão, o NetPulse monitora os seguintes servidores DNS:
+## Limitations
 
-| Provedor | Endereço IP |
-|---|---|
-| Cloudflare | `1.1.1.1` |
-| Google DNS | `8.8.8.8` |
-| Quad9 | `9.9.9.9` |
-| OpenDNS | `208.67.222.222` |
+Ping/HTTPS tests are heuristic signals and cannot certify an ISP outage. A server may block ICMP. Browser PDF export requires a user to select **Save as PDF**. No direct server-rendered PDF, speed test, SMTP, remote dashboard, native Windows Service, embedded SQLite database, signed Windows binary, or macOS packaging is provided in this release. A Windows login-start shortcut is not the same thing as a system service.
 
-Também é utilizado um teste HTTPS complementar para auxiliar na identificação de problemas gerais de conectividade.
+The storage format is JSON/NDJSON rather than SQLite: no database installation is required. Monitoring pauses if the machine is off, asleep or the Node process stops. Reported sample availability is not contractual SLA.
 
-### 📊 Dashboard e estatísticas
+## Privacy and security
 
-O painel apresenta indicadores de desempenho e disponibilidade da rede, incluindo:
+The dashboard server binds to `127.0.0.1` only and restricts browser origins; do not expose it publicly. All logs stay local except explicitly enabled Telegram messages or outbound connectivity probes. Credentials are stored locally in plaintext in `dados/config.json`, which is Git-ignored. Avoid sharing this file.
 
-- Latência dos destinos monitorados.
-- Histórico visual de conectividade.
-- Disponibilidade e perda de pacotes.
-- Quantidade de falhas identificadas.
-- Estatísticas de resposta.
-- Situação atual dos serviços monitorados.
+## License
 
-### 🚨 Identificação automática de quedas
-
-O NetPulse analisa os resultados dos testes para identificar possíveis interrupções gerais de conectividade.
-
-O diagnóstico considera a falha persistente de múltiplos destinos DNS em conjunto com o teste HTTPS complementar.
-
-Essa abordagem ajuda a diferenciar indisponibilidades isoladas de possíveis problemas mais abrangentes na conexão.
-
-**Importante:** falhas de resposta a ICMP ou HTTPS não significam necessariamente interrupção do serviço de internet. Os resultados devem ser interpretados como evidências técnicas auxiliares.
-
-### 💾 Registro persistente de incidentes
-
-As ocorrências são registradas em um arquivo JSON:
-
-`dados/quedas.json`
-
-Cada incidente pode conter:
-
-- Destino afetado.
-- Data e horário de início.
-- Data e horário de recuperação.
-- Duração da interrupção.
-- Informações sobre a ocorrência.
-
-Os registros permanecem disponíveis após o encerramento e a reinicialização da aplicação.
-
-### 📄 Relatórios para provedores de internet
-
-O NetPulse disponibiliza uma interface para geração de relatórios técnicos sobre a estabilidade da conexão.
-
-Os relatórios incluem:
-
-- Período analisado.
-- Quantidade de ocorrências registradas.
-- Duração acumulada das possíveis interrupções gerais.
-- Histórico detalhado das falhas.
-- Horários de início e restabelecimento.
-
-É possível selecionar o período desejado e utilizar a opção **Imprimir / Salvar como PDF** do navegador.
-
-Os relatórios podem ser utilizados como documentação complementar em reclamações e solicitações de suporte junto aos provedores de internet.
-
-### 🔔 Alertas sonoros
-
-O NetPulse possui notificações sonoras para possíveis interrupções gerais de conectividade.
-
-O usuário pode habilitar os alertas diretamente na interface por meio da opção **Ativar som**.
-
-Para que os alertas sejam reproduzidos, o navegador deve permanecer aberto e permitir a execução de áudio.
-
-### 🛠️ Diagnóstico de rede
-
-O projeto inclui ferramentas para auxiliar na investigação de problemas de conectividade, como:
-
-- Testes de ping.
-- Análise de latência.
-- Identificação de perdas de resposta.
-- Execução de traceroute.
-- Investigação dos saltos de rede até o destino.
-
-O traceroute pode auxiliar na identificação de pontos em que deixam de ser recebidas respostas, embora alguns equipamentos bloqueiem ou limitem esse tipo de diagnóstico.
-
-## 🧰 Tecnologias utilizadas
-
-O projeto utiliza tecnologias web e recursos nativos do Node.js.
-
-| Tecnologia | Utilização |
-|---|---|
-| HTML5 | Estrutura da interface |
-| CSS3 | Estilização e responsividade |
-| JavaScript | Interatividade e gráficos |
-| Node.js | Servidor local e execução dos testes |
-| JSON | Persistência do histórico |
-| ICMP / Ping | Verificação de conectividade |
-| Traceroute | Diagnóstico de rotas |
-
-A aplicação não depende de serviços externos para armazenar seu histórico de monitoramento.
-
-## 🚀 Instalação e execução
-
-### Pré-requisitos
-
-- Windows.
-- Node.js instalado.
-- Navegador atualizado.
-- Conexão de rede para execução dos testes.
-
-Baixe o Node.js em:
-
-https://nodejs.org/
-
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/SEU-USUARIO/netpulse.git
-```
-
-Acesse a pasta do projeto:
-
-```bash
-cd netpulse
-```
-
-### 2. Execute a aplicação
-
-No Windows, execute:
-
-```bat
-INICIAR-WINDOWS.bat
-```
-
-O servidor local será iniciado.
-
-### 3. Acesse o dashboard
-
-Abra seu navegador e acesse:
-
-http://127.0.0.1:8787
-
-O monitoramento será apresentado na interface web.
-
-**Observação:** o backend deve permanecer executando para que os testes de conectividade e a gravação dos incidentes continuem funcionando.
-
-## 📁 Estrutura do projeto
-
-Exemplo dos principais componentes:
-
-```text
-netpulse/
-├── index.html
-├── relatorio.html
-├── server.js
-├── INICIAR-WINDOWS.bat
-├── README.md
-└── dados/
-    └── quedas.json
-```
-
-O diretório `dados/` é destinado ao armazenamento local dos registros produzidos durante o monitoramento.
-
-## 📈 Funcionamento do monitoramento
-
-O NetPulse executa verificações periódicas contra destinos conhecidos na internet.
-
-O funcionamento básico segue este fluxo:
-
-1. Executar os testes de conectividade.
-2. Registrar os tempos de resposta.
-3. Atualizar os indicadores e gráficos.
-4. Identificar falhas consecutivas.
-5. Avaliar se os resultados sugerem uma interrupção geral.
-6. Registrar o incidente em JSON.
-7. Emitir um alerta sonoro, quando habilitado.
-8. Registrar a recuperação da conexão.
-9. Disponibilizar as informações no relatório.
-
-O intervalo padrão entre verificações é de aproximadamente **4 segundos**.
-
-## 🔒 Privacidade e armazenamento
-
-O NetPulse foi projetado para funcionar localmente.
-
-Os registros de incidentes são armazenados no próprio computador, sem necessidade de criar uma conta em um serviço de nuvem.
-
-O usuário mantém o controle sobre os dados gerados.
-
-**Atenção:** os arquivos de histórico podem revelar horários de utilização e informações sobre a rede. Evite publicar registros pessoais diretamente no GitHub.
-
-## ⚠️ Limitações conhecidas
-
-- Navegadores não permitem executar diretamente ping ICMP ou traceroute. Por isso, o NetPulse utiliza um backend local em Node.js.
-- Equipamentos e servidores podem limitar respostas ICMP, mesmo quando a conexão está funcionando.
-- Os diagnósticos automáticos não identificam necessariamente a causa exata de uma falha.
-- A qualidade do monitoramento depende do computador estar ligado e do processo permanecer em execução.
-- Alertas sonoros dependem das permissões e das condições de execução do navegador.
-- Os relatórios representam as medições realizadas pelo dispositivo e não constituem, isoladamente, prova definitiva de descumprimento contratual pelo provedor.
-
-## 🗺️ Roadmap
-
-Sugestões de melhorias futuras:
-
-- [ ] Configuração de destinos personalizados.
-- [ ] Monitoramento simultâneo de múltiplas interfaces de rede.
-- [ ] Gráficos históricos por dia, semana e mês.
-- [ ] Indicadores de jitter.
-- [ ] Cálculo de SLA e disponibilidade mensal.
-- [ ] Diagnóstico avançado da rede local.
-- [ ] Relatórios PDF gerados diretamente pelo backend.
-- [ ] Exportação de dados em múltiplos formatos.
-- [ ] Notificações via Telegram ou e-mail.
-- [ ] Execução automática ao iniciar o Windows.
-- [ ] Suporte ampliado a Linux e macOS.
-- [ ] Empacotamento como aplicação desktop.
-
-## 🤝 Como contribuir
-
-Contribuições são bem-vindas!
-
-Você pode colaborar corrigindo bugs, propondo funcionalidades, aprimorando a interface ou expandindo os recursos de diagnóstico.
-
-Para contribuir:
-
-1. Faça um fork do repositório.
-2. Crie uma branch para sua alteração.
-3. Implemente e teste suas modificações.
-4. Faça commit das alterações.
-5. Abra um Pull Request descrevendo a contribuição.
-
-Problemas, sugestões e solicitações de recursos também podem ser registrados na seção **Issues** do GitHub.
-
-## ⭐ Apoie o projeto
-
-Se o NetPulse foi útil para você, considere deixar uma estrela ⭐ no repositório.
-
-Seu apoio ajuda a dar visibilidade ao projeto e incentiva o desenvolvimento de novas funcionalidades.
-
----
-
-**NetPulse — Monitorar, diagnosticar e documentar sua conexão com a internet.**
+MIT. See `LICENSE`.

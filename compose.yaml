@@ -1,0 +1,8 @@
+services:
+  netpulse:
+    build: .
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./dados:/app/dados
+    # Linux host networking required for dashboard bound to loopback.
